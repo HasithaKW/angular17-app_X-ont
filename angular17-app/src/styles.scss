@@ -1,0 +1,50 @@
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Material Overrides */
+.mat-mdc-card {
+  border-radius: 16px !important;
+}
+
+.mat-mdc-form-field-hint {
+  font-size: 11px !important;
+}
+
+.mat-mdc-paginator {
+  background: transparent !important;
+}
+
+.mat-mdc-row:hover {
+  background-color: #f8f9fa;
+}

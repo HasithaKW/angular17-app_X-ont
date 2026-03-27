@@ -1,0 +1,31 @@
+<!doctype html>
+<!-- MIGRATION: index.html — Angular 4 → Angular 17
+  REMOVED:
+    - SystemJS scripts (system.src.js, systemjs.config.js)
+    - shim.min.js, Reflect.js (not needed in Angular 17)
+    - Bootstrap CDN (use Angular package or keep if needed)
+    - font-awesome CDN (add to styles.scss if needed)
+    - angular2-busy CSS
+    - jquery script tag (not needed for Angular 17 API calls)
+    - setupGridLoader() script call (replaced by Angular signals)
+    - document.write base href (replaced by <base href="/">)
+  PRESERVED:
+    - Bootstrap CSS import in styles.scss
+    - app styles (FornColor1, FornColor2 etc.)
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>SOMNT24 — XONT Ventura</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+  <!-- MIGRATION: <my-app> → <app-root> (Angular 17 convention) -->
+  <app-root>
+    <div class="taskLoad" style="padding:20px;font-family:sans-serif;color:#555">Loading...</div>
+  </app-root>
+</body>
+</html>

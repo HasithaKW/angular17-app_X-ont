@@ -1,0 +1,170 @@
+<div *ngIf="busy" class="loading-spinner">Loading...</div>
+
+<xont-ventura-message-prompt #msgPrompt></xont-ventura-message-prompt>
+
+<xont-ventura-message-prompt [id]="'msgAlert'" messageType="alert" (onOK)="msgAlert_OkClick()" (onCancel)="msgAlert_OnCancel()" #msgAlert></xont-ventura-message-prompt>
+
+<form #form1="ngForm">
+  <table>
+    <tbody>
+      <tr>
+        <td width="140">
+          <span class="Captionstyle">Return Type</span>
+        </td>
+        <td width="200">
+          <input type="text" [(ngModel)]="formData.ReturnType" name="txtReturnType" #txtReturnType="ngModel" [disabled]="!formDataProperties.ReturnType.Enable"
+                 id="txtReturnType" class="Textboxstyle" style="width:120px;" maxlength="2" required pattern="^[a-zA-Z0-9_\-]+$"> 
+          <span [hidden]="!txtReturnType.errors || !txtReturnType.errors['required']" class="MandatoryValidatorStyle">*</span>
+          &nbsp;
+          <span [hidden]="!txtReturnType.errors || !txtReturnType.errors['pattern']" class="Errormessagetextstyle">Invalid entry</span>
+        </td>
+        <td width="140"></td>
+      </tr>
+      <tr>
+        <td width="140">
+          <span class="Captionstyle">Description</span>
+        </td>
+        <td width="200">
+          <input type="text" [(ngModel)]="formData.Description" name="txtDescription" #txtDescription="ngModel" 
+                 id="txtDescription" class="Textboxstyle" style="width:350px;" maxlength="50" required pattern="^[^;‘‘’#&quot;'&amp;]*$">
+        </td>
+        <td width="140">
+          <span [hidden]="!txtDescription.errors || !txtDescription.errors['required']" class="MandatoryValidatorStyle">*</span>&nbsp;
+          <span [hidden]="!txtDescription.errors || !txtDescription.errors['pattern']" class="Errormessagetextstyle">Invalid entry</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <table>
+    <tbody>
+      <tr>
+        <td width="140">
+          <span class="Captionstyle">Module Code</span>
+        </td>
+        <td width="565">
+          <xont-ventura-list-prompt name="lpmtModule" id="lpmtModule"
+                                    #lpmtModule
+                                    [maxLengths]="[4,50]"
+                                    [inputWidths]="[120,380]"
+                                    [gridHeaders]="['Module Code','Description']"
+                                    [gridFields]="['Module Code','Description']"
+                                    [disabled]="!formDataProperties.btnModuleCode.Enable"
+                                    [strict]="true"
+                                    [mandatory]="true" 
+                                    (onDataBind)="lpmtModule_DataBind()"
+                                    [(ngModel)]="formData"
+                                    [modelProps]="['ModuleCode','ModuleCodeDesc']"
+                                    [dataFields]="['Module Code','Description']">
+          </xont-ventura-list-prompt>
+        </td>
+        <td width="140"></td>
+      </tr>
+      <tr>
+        <td width="140">
+          <span class="Captionstyle">Return Category</span>
+        </td>
+        <td width="565">
+          <xont-ventura-list-prompt name="lpmtReturnCategory" id="lpmtReturnCategory"
+                                    #lpmtReturnCategory
+                                    [maxLengths]="[4,50]"
+                                    [inputWidths]="[120,380]"
+                                    [gridHeaders]="['Module Code','Description']"
+                                    [gridFields]="['Return Catagory','Description']"
+                                    [strict]="true"
+                                    (onDataBind)="lpmtReturnCategory_DataBind()"
+                                    [(ngModel)]="formData"
+                                    [modelProps]="['ReturnCategory','CategoryDesc']"
+                                    [dataFields]="['Return Catagory','Description']">
+          </xont-ventura-list-prompt>
+        </td>
+        <td width="140"></td>
+      </tr>
+    </tbody>
+  </table>
+  <table>
+    <tbody>
+      <tr>
+        <td width="140"></td>
+        <td>
+          <fieldset style="width:300px">
+            <legend class="Captionstyle">Return Value Validation</legend>
+            <table>
+              <tbody>
+                <tr>
+                  <td>
+                    <span class="Captionstyle">
+                      <input id="optNo" type="radio" name="ReturnValueValidation"
+                              value="No" [checked]="formData.ReturnValueValidation ==='No'"
+                              (change)="ChangeReturnValueValidation('No')">
+                      <label for="optNo">No</label>&nbsp;&nbsp;
+                    </span>
+                  </td>
+                  <td>
+                    <span class="Captionstyle">
+                      <input id="optMandatory" type="radio" name="ReturnValueValidation"
+                             value="Mandatory" [checked]="formData.ReturnValueValidation ==='Mandatory'"
+                             (change)="ChangeReturnValueValidation('Mandatory')">
+                      <label for="optMandatory">Mandatory</label>&nbsp;&nbsp;
+                    </span>
+                  </td>
+                  <td>
+                    <span class="Captionstyle">
+                      <input id="optWithConfirmation" type="radio" name="ReturnValueValidation"
+                              value="WithConfirmation" [checked]="formData.ReturnValueValidation ==='WithConfirmation'"
+                              (change)="ChangeReturnValueValidation('WithConfirmation')">
+                      <label for="optWithConfirmation">With Confirmation</label>
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </fieldset>
+        </td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <table>
+    <tbody>
+      <tr>
+        <td width="140"></td>
+        <td width="140">
+          <input type="checkbox" name="chkSalable" [(ngModel)]="formData.SalableReturn" [checked]="formData.SalableReturn" />
+          &nbsp;
+          <span class="Captionstyle">Salable Return</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td width="140"></td>
+        <td width="140">
+          <input type="checkbox" name="chkDeduct" [(ngModel)]="formData.DeductFromSales" [checked]="formData.DeductFromSales"  />
+          &nbsp;
+          <span class="Captionstyle">Deduct From Sales</span>
+        </td>
+        <td width="140"></td>
+      </tr>
+      <tr>
+        <td width="140"></td>
+        <td width="140">
+          <input type="checkbox" name="chkActive" [(ngModel)]="formData.Active" [checked]="formData.Active" />
+          &nbsp;
+          <span class="Captionstyle">Active</span>
+        </td>
+        <td width="140"></td>
+      </tr>
+    </tbody>
+  </table>
+  <table>
+    <tbody>
+      <tr>
+        <td width="250">
+          <button id="btnOK" [disabled]="!lpmtModule?.valid || !form1.valid" (click)="btnOk_OnClick(formData)" class="MainButtonStyle">OK</button>&nbsp;
+          <button id="btnCancel" (click)="goBack()" class="MainButtonStyle">Cancel</button>
+        </td>
+        <td></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</form>

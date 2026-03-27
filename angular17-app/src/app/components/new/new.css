@@ -1,0 +1,58 @@
+.Captionstyle {
+  font-weight: bold;
+  color: #333;
+}
+
+.Textboxstyle {
+  border: 1px solid #ccc;
+  padding: 4px;
+  border-radius: 3px;
+}
+
+.MainButtonStyle {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 5px 15px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.MainButtonStyle:hover {
+  background: #0056b3;
+}
+
+.MandatoryValidatorStyle {
+  color: red;
+  font-weight: bold;
+}
+
+.Errormessagetextstyle {
+  color: red;
+  font-size: 11px;
+}
+
+.loading-spinner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 20px;
+  border-radius: 5px;
+  z-index: 9999;
+}
+
+fieldset {
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 4px;
+}
+
+legend {
+  width: auto;
+  padding: 0 10px;
+  font-weight: bold;
+}

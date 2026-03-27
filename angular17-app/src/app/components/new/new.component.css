@@ -1,0 +1,97 @@
+.Captionstyle {
+  font-weight: bold;
+  color: #333;
+  font-size: 12px;
+}
+
+.Textboxstyle {
+  border: 1px solid #ccc;
+  padding: 4px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.Textboxstyle:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.MainButtonStyle {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 5px 15px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.MainButtonStyle:hover {
+  background: #0056b3;
+}
+
+.MainButtonStyle:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.MandatoryValidatorStyle {
+  color: red;
+  font-weight: bold;
+  font-size: 12px;
+  margin-left: 5px;
+}
+
+.Errormessagetextstyle {
+  color: red;
+  font-size: 11px;
+  margin-left: 5px;
+}
+
+.loading-spinner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 20px;
+  border-radius: 5px;
+  z-index: 9999;
+  font-size: 14px;
+}
+
+fieldset {
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 4px;
+}
+
+legend {
+  width: auto;
+  padding: 0 10px;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+input[type="checkbox"] {
+  margin-right: 5px;
+}
+
+table {
+  width: 100%;
+}
+
+td {
+  padding: 5px;
+}
+
+form {
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  margin-top: 10px;
+}

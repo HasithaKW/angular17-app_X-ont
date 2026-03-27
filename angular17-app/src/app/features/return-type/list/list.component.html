@@ -1,0 +1,226 @@
+<!-- ============================================================
+  MIGRATION: list.component.html — Angular 4 → Angular 17
+  REPLACED:
+    [ngBusy]                      → loading spinner div
+    <xont-ventura-message-prompt> → inline error alert
+    <xont-ventura-collapsible>    → native toggle button
+    <xont-ventura-list-prompt>    → native <select> dropdown
+    angular2-datatable mf*        → native *ngFor + sort headers
+    <mfBootstrapPaginator>        → native pagination buttons
+    <xont-ventura-gridloader>     → page-size select
+    <xont-ventura-gridexport>     → export button (placeholder)
+  PRESERVED:
+    All CSS class names (Captionstyle, Textboxstyle, etc.)
+    selectionCriteria field names, localStorage key
+    ngModel bindings, button labels, column structure
+    Inactive row highlight (InactiveGridRowStyle)
+============================================================ -->
+
+<!-- Loading Spinner — MIGRATION: replaces [ngBusy]="busy" -->
+@if (isLoading()) {
+  <div class="loading-overlay">
+    <div class="spinner"></div>
+    <span class="Captionstyle">Loading...</span>
+  </div>
+}
+
+<!-- Error Alert — MIGRATION: replaces <xont-ventura-message-prompt> -->
+@if (errorMsg()) {
+  <div class="alert-bar error">
+    <span>{{ errorMsg() }}</span>
+    <button class="alert-close" (click)="dismissError()">✕</button>
+  </div>
+}
+
+<!-- Selection Criteria Panel -->
+<!-- MIGRATION: <xont-ventura-collapsible> → native toggle button + @if -->
+<div class="panel-header">
+  <button type="button" class="MainButtonStyle collapse-toggle" (click)="toggleCollapse()">
+    {{ collapsed() ? 'Selection Criteria ▼' : 'Hide ▲' }}
+  </button>
+</div>
+
+@if (!collapsed()) {
+  <div class="selection-panel">
+    <table>
+      <tbody>
+        <tr>
+          <td width="140">
+            <span class="Captionstyle">Return Type</span>
+          </td>
+          <td width="120">
+            <!-- MIGRATION: Preserved ngModel binding, maxlength, pattern -->
+            <input [(ngModel)]="criteria.retnType"
+                   type="text" id="txtReturnType"
+                   class="Textboxstyle"
+                   style="width:120px"
+                   maxlength="2"
+                   name="txtReturnType"
+                   #txtReturnType="ngModel"
+                   pattern="^[a-zA-Z0-9_\-]+$" />
+          </td>
+          <td width="10"></td>
+          <td width="120">
+            <span class="Captionstyle">Description</span>
+          </td>
+          <td width="280">
+            <input [(ngModel)]="criteria.description"
+                   type="text" id="txtDescription"
+                   class="Textboxstyle"
+                   style="width:305px"
+                   maxlength="40"
+                   name="txtDescription"
+                   #txtDescription="ngModel" />
+          </td>
+          <td width="200">
+            <span *ngIf="txtReturnType.errors?.['pattern']" class="Errormessagetextstyle">Invalid entry</span>
+            <span *ngIf="txtDescription.errors?.['pattern']" class="Errormessagetextstyle">Invalid entry</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table>
+      <tbody>
+        <tr>
+          <td width="140">
+            <span class="Captionstyle">Module Code</span>
+          </td>
+          <td>
+            <!-- MIGRATION: <xont-ventura-list-prompt> → native <select> -->
+            <select class="Textboxstyle"
+                    style="width:120px"
+                    (change)="onModuleSelect($event)"
+                    name="selModule">
+              <option value="">-- All --</option>
+              @for (m of modulePrompt(); track m.code) {
+                <option [value]="m.code"
+                        [selected]="criteria.moduleCode === m.code">
+                  {{ m.code }} - {{ m.description }}
+                </option>
+              }
+            </select>
+            @if (criteria.moduleCodeDesc) {
+              <span class="Captionstyle" style="margin-left:8px">{{ criteria.moduleCodeDesc }}</span>
+            }
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table>
+      <tbody>
+        <tr>
+          <td width="140"></td>
+          <td>
+            <span class="Checkboxstyle">
+              <!-- MIGRATION: Preserved checkbox binding from original -->
+              <input id="chkActive" type="checkbox"
+                     [(ngModel)]="criteria.status"
+                     name="chkActive" />
+              <label class="Captionstyle" for="chkActive" style="color:darkblue;">Active Only</label>
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>
+            <button type="button" name="btnList"
+                    [disabled]="txtReturnType.errors || txtDescription.errors"
+                    (click)="list(true)"
+                    class="MainButtonStyle">List</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+}
+
+<!-- Grid Export Button — MIGRATION: <xont-ventura-gridexport> → native button -->
+<div style="margin: 6px 0;">
+  <button type="button" class="MainButtonStyle" (click)="list(true)" title="Refresh grid">
+    ↻ Refresh
+  </button>
+</div>
+
+<!-- No Data Message — MIGRATION: preserved [hidden] logic as @if -->
+@if (!isLoading() && returnTypes().length === 0) {
+  <span class="Labelstyle">No data found for the given criteria</span>
+}
+
+<!-- Data Grid -->
+<!-- MIGRATION: [mfData], [mfRowsOnPage], mfDefaultSorter → native *ngFor + sort methods -->
+@if (returnTypes().length > 0) {
+  <div class="DataTableContainer">
+    <table id="tblReturn" class="DataTableStyle HeaderFreezeStyle">
+      <thead>
+        <tr>
+          <th style="width:21%;" (click)="setSort('returnType')" class="sortable-header">
+            Return Type {{ getSortIcon('returnType') }}
+          </th>
+          <th style="width:43%;" (click)="setSort('description')" class="sortable-header">
+            Description {{ getSortIcon('description') }}
+          </th>
+          <th style="width:16%;" (click)="setSort('moduleCode')" class="sortable-header">
+            Module Code {{ getSortIcon('moduleCode') }}
+          </th>
+          <th style="width:20%;">Options</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- MIGRATION: *ngFor of mf.data → *ngFor of pagedData -->
+        <!-- MIGRATION: InactiveGridRowStyle preserved: status == '0' means inactive -->
+        @for (item of pagedData; track item.returnType + item.moduleCode) {
+          <tr [class.InactiveGridRowStyle]="item.status === '0'">
+            <td style="width:21%"><div>{{ item.returnType }}</div></td>
+            <td style="width:43%">{{ item.description }}</td>
+            <td style="width:16%">{{ item.moduleCode }}</td>
+            <td style="width:20%">
+              <!-- MIGRATION: (click) handlers preserved with exact same method names -->
+              <a class="linkButton" (click)="btnNewBased_onClick(item)">NewBasedOn</a>&nbsp;|&nbsp;
+              <a class="linkButton" (click)="btnEdit_onClick(item)">Edit</a>
+            </td>
+          </tr>
+        }
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4">
+            <!-- MIGRATION: <mfBootstrapPaginator> → native pagination -->
+            <div class="pagination-bar">
+              <button class="MainButtonStyle page-btn"
+                      [disabled]="currentPage() <= 1"
+                      (click)="goToPage(currentPage() - 1)">‹ Prev</button>
+
+              <span class="Captionstyle page-info">
+                Page {{ currentPage() }} of {{ totalPages }}
+                ({{ totalRows() }} records)
+              </span>
+
+              <button class="MainButtonStyle page-btn"
+                      [disabled]="currentPage() >= totalPages"
+                      (click)="goToPage(currentPage() + 1)">Next ›</button>
+
+              <!-- MIGRATION: xont-ventura-gridloader page-size selector → native select -->
+              <select class="Textboxstyle page-size-select"
+                      [value]="pageSize()"
+                      (change)="pageSize.set(+$any($event.target).value); goToPage(1)">
+                <option [value]="10">10 / page</option>
+                <option [value]="25">25 / page</option>
+                <option [value]="50">50 / page</option>
+                <option [value]="100">100 / page</option>
+              </select>
+            </div>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+}
+
+<!-- Footer Buttons — MIGRATION: Preserved exact button layout and labels -->
+<div style="margin-top: 12px;">
+  <br />
+  <button (click)="newClick()" class="MainButtonStyle">New</button>
+  <button (click)="closeTab()" class="MainButtonStyle">Exit</button>
+</div>

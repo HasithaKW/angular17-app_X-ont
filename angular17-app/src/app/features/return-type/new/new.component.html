@@ -1,0 +1,265 @@
+<!-- ============================================================
+  MIGRATION: new.component.html — Angular 4 → Angular 17
+  REPLACED:
+    [ngBusy]                         → loading spinner @if
+    <xont-ventura-message-prompt>    → inline alert divs
+    <xont-ventura-list-prompt>       → native <select> for Module & Category
+    [disabled]="!lpmtModule.valid"   → form.valid check
+    templateUrl relative paths       → component-relative (Angular 17 default)
+  PRESERVED:
+    All field names, form structure, table layout
+    CSS class names (Captionstyle, Textboxstyle, etc.)
+    Required/pattern validators
+    ReturnValueValidation radio group with exact option names
+    Checkbox fields: SalableReturn, DeductFromSales, Active
+    Button labels: OK, Cancel
+    formDataProperties enable/disable for edit mode
+============================================================ -->
+
+<!-- Loading Spinner — MIGRATION: replaces [ngBusy]="busy" -->
+@if (isLoading()) {
+  <div class="loading-overlay">
+    <div class="spinner"></div>
+    <span class="Captionstyle">Please wait...</span>
+  </div>
+}
+
+<!-- Error Message — MIGRATION: replaces <xont-ventura-message-prompt #msgPrompt> -->
+@if (errorMsg()) {
+  <div class="alert-bar error">
+    <span>{{ errorMsg() }}</span>
+    <button type="button" class="alert-close" (click)="dismissError()">✕</button>
+  </div>
+}
+
+<!-- Alert Dialog — MIGRATION: replaces <xont-ventura-message-prompt messageType="alert" #msgAlert> -->
+@if (showAlert()) {
+  <div class="alert-overlay">
+    <div class="alert-dialog">
+      <p class="Captionstyle">{{ alertMsg() }}</p>
+      <button type="button" class="MainButtonStyle" (click)="dismissAlert()">OK</button>
+    </div>
+  </div>
+}
+
+<!-- Main Form — MIGRATION: #form1="ngForm" preserved; action removed (was empty) -->
+<form #form1="ngForm" (ngSubmit)="btnOk_OnClick(form1)">
+
+  <table>
+    <tbody>
+      <tr>
+        <td width="140">
+          <span class="Captionstyle">Return Type</span>
+        </td>
+        <td width="200">
+          <!-- MIGRATION: [disabled] preserved via formDataProperties -->
+          <input type="text"
+                 [(ngModel)]="formData.returnType"
+                 name="txtReturnType"
+                 #txtReturnType="ngModel"
+                 [disabled]="!formDataProperties.returnType.enable"
+                 id="txtReturnType"
+                 class="Textboxstyle"
+                 style="width:120px;"
+                 maxlength="2"
+                 required
+                 pattern="^[a-zA-Z0-9_\-]+$" />
+          <span [hidden]="!txtReturnType.errors?.['required']" class="MandatoryValidatorStyle">*</span>&nbsp;
+          <span [hidden]="!txtReturnType.errors?.['pattern']"  class="Errormessagetextstyle">Invalid entry</span>
+        </td>
+        <td width="140"></td>
+      </tr>
+      <tr>
+        <td width="140">
+          <span class="Captionstyle">Description</span>
+        </td>
+        <td width="200">
+          <input type="text"
+                 [(ngModel)]="formData.description"
+                 name="txtDescription"
+                 #txtDescription="ngModel"
+                 id="txtDescription"
+                 class="Textboxstyle"
+                 style="width:350px;"
+                 maxlength="50"
+                 required
+                 pattern="^[^;#&quot;'&amp;]*$" />
+        </td>
+        <td width="140">
+          <span [hidden]="!txtDescription.errors?.['required']" class="MandatoryValidatorStyle">*</span>&nbsp;
+          <span [hidden]="!txtDescription.errors?.['pattern']"  class="Errormessagetextstyle">Invalid entry</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table>
+    <tbody>
+      <tr>
+        <td width="140">
+          <span class="Captionstyle">Module Code</span>
+        </td>
+        <td width="565">
+          <!-- MIGRATION: <xont-ventura-list-prompt #lpmtModule> → native <select> -->
+          <select class="Textboxstyle"
+                  style="width:120px"
+                  name="selModule"
+                  [disabled]="!formDataProperties.btnModuleCode.enable"
+                  (change)="onModuleSelect($event)"
+                  required>
+            <option value="">-- Select --</option>
+            @for (m of moduleOptions(); track m.code) {
+              <option [value]="m.code"
+                      [selected]="formData.moduleCode === m.code">
+                {{ m.code }}
+              </option>
+            }
+          </select>
+          <!-- Description shown alongside code -->
+          <input type="text"
+                 [(ngModel)]="formData.moduleCodeDesc"
+                 name="txtModuleCodeDesc"
+                 [disabled]="!formDataProperties.moduleCodeDesc.enable"
+                 class="Textboxstyle"
+                 style="width:380px; margin-left:4px"
+                 maxlength="50"
+                 readonly />
+        </td>
+        <td width="140"></td>
+      </tr>
+      <tr>
+        <td width="140">
+          <span class="Captionstyle">Return Category</span>
+        </td>
+        <td width="565">
+          <!-- MIGRATION: <xont-ventura-list-prompt #lpmtReturnCategory> → native <select> -->
+          <select class="Textboxstyle"
+                  style="width:120px"
+                  name="selCategory"
+                  (change)="onCategorySelect($event)">
+            <option value="">-- Select --</option>
+            @for (c of categoryOptions(); track c.code) {
+              <option [value]="c.code"
+                      [selected]="formData.returnCategory === c.code">
+                {{ c.code }}
+              </option>
+            }
+          </select>
+          <input type="text"
+                 [(ngModel)]="formData.categoryDesc"
+                 name="txtCategoryDesc"
+                 class="Textboxstyle"
+                 style="width:380px; margin-left:4px"
+                 maxlength="50"
+                 readonly />
+        </td>
+        <td width="140"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Return Value Validation Radio Group — MIGRATION: Preserved exactly from original -->
+  <table>
+    <tbody>
+      <tr>
+        <td width="140"></td>
+        <td>
+          <fieldset style="width:340px">
+            <legend class="Captionstyle">Return Value Validation</legend>
+            <table>
+              <tbody>
+                <tr>
+                  <td>
+                    <span class="Captionstyle">
+                      <!-- MIGRATION: [checked] + (change) pattern preserved exactly -->
+                      <input id="optNo" type="radio" name="rvv"
+                             value="No"
+                             [checked]="formData.returnValueValidation === 'No'"
+                             (change)="changeReturnValueValidation('No')" />
+                      <label for="optNo">No</label>&nbsp;&nbsp;
+                    </span>
+                  </td>
+                  <td>
+                    <span class="Captionstyle">
+                      <input id="optMandatory" type="radio" name="rvv"
+                             value="Mandatory"
+                             [checked]="formData.returnValueValidation === 'Mandatory'"
+                             (change)="changeReturnValueValidation('Mandatory')" />
+                      <label for="optMandatory">Mandatory</label>&nbsp;&nbsp;
+                    </span>
+                  </td>
+                  <td>
+                    <span class="Captionstyle">
+                      <input id="optWithConfirmation" type="radio" name="rvv"
+                             value="WithConfirmation"
+                             [checked]="formData.returnValueValidation === 'WithConfirmation'"
+                             (change)="changeReturnValueValidation('WithConfirmation')" />
+                      <label for="optWithConfirmation">With Confirmation</label>
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </fieldset>
+        </td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Checkboxes — MIGRATION: All three checkboxes preserved exactly -->
+  <table>
+    <tbody>
+      <tr>
+        <td width="140"></td>
+        <td width="200">
+          <input type="checkbox" name="chkSalable"
+                 [(ngModel)]="formData.salableReturn" />
+          &nbsp;<span class="Captionstyle">Salable Return</span>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td width="140"></td>
+        <td width="200">
+          <input type="checkbox" name="chkDeduct"
+                 [(ngModel)]="formData.deductFromSales" />
+          &nbsp;<span class="Captionstyle">Deduct From Sales</span>
+        </td>
+        <td width="140"></td>
+      </tr>
+      <tr>
+        <td width="140"></td>
+        <td width="200">
+          <input type="checkbox" name="chkActive"
+                 [(ngModel)]="formData.active" />
+          &nbsp;<span class="Captionstyle">Active</span>
+        </td>
+        <td width="140"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Action Buttons — MIGRATION: Preserved button labels and validation guard -->
+  <table>
+    <tbody>
+      <tr>
+        <td width="250">
+          <!-- MIGRATION: [disabled]="!lpmtModule.valid || !form1.valid"
+               → [disabled]="!formData.moduleCode || form1.invalid" -->
+          <button type="submit"
+                  id="btnOK"
+                  [disabled]="!formData.moduleCode || form1.invalid || isLoading()"
+                  class="MainButtonStyle">OK</button>&nbsp;
+          <button type="button"
+                  id="btnCancel"
+                  (click)="btnClose_OnClick()"
+                  class="MainButtonStyle">Cancel</button>
+        </td>
+        <td></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+
+</form>

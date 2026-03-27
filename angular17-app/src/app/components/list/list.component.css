@@ -1,0 +1,408 @@
+/* Modern Container */
+.modern-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+  background: #f5f7fa;
+  min-height: 100vh;
+}
+
+/* Header Section */
+.header-section {
+  margin-bottom: 32px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 32px;
+  color: white;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.header-content {
+  text-align: center;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 32px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: white;
+}
+
+.title-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+}
+
+.subtitle {
+  font-size: 16px;
+  opacity: 0.95;
+  margin: 0;
+}
+
+/* Filter Card */
+.filter-card {
+  margin-bottom: 32px;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.card-header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: #667eea;
+}
+
+/* Filter Form */
+.filter-form {
+  padding: 16px 0 8px 0;
+}
+
+.filter-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.filter-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.filter-field {
+  width: 100%;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.filter-checkbox {
+  padding-top: 8px;
+}
+
+.active-checkbox {
+  margin-bottom: 4px;
+}
+
+.checkbox-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.checkbox-hint {
+  font-size: 12px;
+  color: #666;
+}
+
+/* Filter Actions */
+.filter-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 24px;
+  padding-top: 8px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.action-button {
+  min-width: 140px;
+}
+
+/* Results Section */
+.results-section {
+  margin-bottom: 32px;
+}
+
+.results-card {
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.record-count {
+  font-weight: 500;
+  color: #667eea;
+}
+
+/* Export Toolbar */
+.export-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.export-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Table Container */
+.table-container {
+  overflow-x: auto;
+  margin-bottom: 24px;
+}
+
+.data-table {
+  width: 100%;
+  border-radius: 12px;
+}
+
+.cell-content {
+  padding: 4px 0;
+}
+
+.description-text {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: monospace;
+}
+
+.return-type-badge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.module-badge {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.active {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-badge.inactive {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.status-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  transition: transform 0.2s;
+}
+
+.action-btn:hover {
+  transform: scale(1.1);
+}
+
+.data-row:hover {
+  background-color: #f5f5f5;
+}
+
+/* Pagination */
+.pagination-container {
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.custom-paginator {
+  border-radius: 8px;
+}
+
+/* No Data Section */
+.no-data-section {
+  margin-bottom: 32px;
+}
+
+.no-data-card {
+  border-radius: 16px;
+  text-align: center;
+  padding: 48px 24px;
+  background: white;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.no-data-content {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.no-data-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  color: #ccc;
+  margin-bottom: 24px;
+}
+
+.no-data-content h3 {
+  font-size: 24px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.no-data-content p {
+  color: #999;
+  margin: 8px 0;
+}
+
+.no-data-content .hint {
+  font-size: 13px;
+  color: #bbb;
+  margin-top: 16px;
+}
+
+.reset-button {
+  margin-top: 24px;
+}
+
+/* Action Footer */
+.action-footer {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.footer-button {
+  min-width: 160px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+}
+
+.loading-content {
+  text-align: center;
+  background: white;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.loading-content p {
+  margin-top: 16px;
+  color: #666;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .modern-container {
+    padding: 16px;
+  }
+  
+  .header-section {
+    padding: 24px;
+  }
+  
+  .page-title {
+    font-size: 24px;
+  }
+  
+  .filter-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .filter-actions {
+    flex-direction: column;
+  }
+  
+  .action-button {
+    width: 100%;
+  }
+  
+  .action-footer {
+    flex-direction: column;
+  }
+  
+  .footer-button {
+    width: 100%;
+  }
+  
+  .export-toolbar {
+    justify-content: center;
+  }
+  
+  .action-buttons {
+    justify-content: center;
+  }
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.filter-card,
+.results-card,
+.no-data-card {
+  animation: fadeIn 0.3s ease-out;
+}
