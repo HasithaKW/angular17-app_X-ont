@@ -1,9 +1,18 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { ReturnTypeService, ReturnTypeData } from '../../services/returntype.service';
-import { MessagePromptComponent, ListPromptComponent } from '../placeholders/placeholders.component';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { ReturnTypeService } from '../../services/returntype.service';
 
 @Component({
   selector: 'app-new',
@@ -12,14 +21,22 @@ import { MessagePromptComponent, ListPromptComponent } from '../placeholders/pla
     CommonModule,
     FormsModule,
     RouterModule,
-    MessagePromptComponent,
-    ListPromptComponent
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatCheckboxModule,
+    MatRadioModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    MatSnackBarModule
   ],
   templateUrl: './new.component.html',
   styleUrls: ['./new.component.css']
 })
 export class NewComponent implements OnInit {
-  private pageType: string = '';
+  pageType: string = '';
   private RetnType: string = '';
   private ModuleCode: string = '';
   busy = false;
@@ -32,10 +49,9 @@ export class NewComponent implements OnInit {
     ReturnCategory: '',
     CategoryDesc: '',
     ReturnValueValidation: 'No',
-    SalableReturn: true,
-    DeductFromSales: true,
-    Active: true,
-    pageType: ''  // Added pageType property
+    SalableReturn: false,
+    DeductFromSales: false,
+    Active: true
   };
 
   formDataProperties = {
@@ -45,157 +61,106 @@ export class NewComponent implements OnInit {
     ModuleCodeDesc: { Enable: true }
   };
 
-  @ViewChild('msgPrompt') msgPrompt: any;
-  @ViewChild('msgAlert') msgAlert: any;
-  @ViewChild('lpmtModule') lpmtModule: any;
-  @ViewChild('lpmtReturnCategory') lpmtReturnCategory: any;
-
-  ReturnTypeDataArray: any[] = [];
-  private RVVcheck: string = '';
-
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private returnTypeService: ReturnTypeService
+    private returnTypeService: ReturnTypeService,
+    private snackBar: MatSnackBar
   ) {
-    this.returnTypeService.error$.subscribe((error) => {
-      if (this.msgPrompt) {
-        this.msgPrompt.show(error, 'SOMNT24');
-      }
+    this.returnTypeService.error$.subscribe((error: any) => {
+      this.showError(error.message || 'An error occurred');
     });
   }
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
-      this.pageType = params['pageType'];
+      this.pageType = params['pageType'] || 'new';
       this.RetnType = params['retnType'];
       this.ModuleCode = params['moduleCode'];
-      this.formData.pageType = this.pageType;
-      this.loadView();
+      
+      if (this.pageType === 'newBasedOn' || this.pageType === 'edit') {
+        this.loadExistingData();
+      }
     });
   }
 
-  msgAlert_OkClick(): void {
-    // Handle OK button click on alert
-  }
+  loadExistingData(): void {
+    this.busy = true;
+    this.returnTypeService.SeletedReturnType(this.ModuleCode, this.RetnType)
+      .subscribe({
+        next: (data: any) => {
+          this.formData.Description = data.Description;
+          this.formData.ReturnCategory = data.ReturnCategory;
+          this.formData.CategoryDesc = data.ReturnCategoryDesc;
+          this.formData.ModuleCode = data.ModuleCode;
+          this.formData.ModuleCodeDesc = data.ModuleCodeDesc;
+          this.formData.TimeStamp = data.TimeStamp;
+          this.formData.SalableReturn = data.ProcessingRequired === '1';
+          this.formData.Active = data.Status === '1';
+          this.formData.DeductFromSales = data.ReturnDeductionType !== '0';
 
-  msgAlert_OnCancel(): void {
-    // Handle Cancel button click on alert
-  }
+          const validation = data.ValidateReturnValue;
+          if (validation === '0') this.formData.ReturnValueValidation = 'No';
+          else if (validation === '1') this.formData.ReturnValueValidation = 'Mandatory';
+          else this.formData.ReturnValueValidation = 'WithConfirmation';
 
-  loadView(): void {
-    if (this.pageType === 'newBasedOn' || this.pageType === 'edit') {
-      this.busy = true;
-      this.returnTypeService.SeletedReturnType(this.ModuleCode, this.RetnType)
-        .subscribe({
-          next: (returnTypeJsonData: any) => {
-            this.ReturnTypeDataArray = returnTypeJsonData;
-            this.formData.Description = returnTypeJsonData.Description;
-            this.formData.ReturnCategory = returnTypeJsonData.ReturnCategory;
-            this.formData.CategoryDesc = returnTypeJsonData.ReturnCategoryDesc;
-            this.formData.ModuleCode = returnTypeJsonData.ModuleCode;
-            this.formData.ModuleCodeDesc = returnTypeJsonData.ModuleCodeDesc;
-            this.formData.TimeStamp = returnTypeJsonData.TimeStamp;
-            this.formData.SalableReturn = returnTypeJsonData.ProcessingRequired === '1';
-            this.formData.Active = returnTypeJsonData.Status === '1';
-            this.formData.DeductFromSales = returnTypeJsonData.ReturnDeductionType !== '0';
-
-            const validation = returnTypeJsonData.ValidateReturnValue;
-            if (validation === '0') {
-              this.formData.ReturnValueValidation = 'No';
-              this.RVVcheck = '0';
-            } else if (validation === '1') {
-              this.formData.ReturnValueValidation = 'Mandatory';
-              this.RVVcheck = '1';
-            } else {
-              this.formData.ReturnValueValidation = 'WithConfirmation';
-              this.RVVcheck = '2';
-            }
-
-            if (this.pageType === 'edit') {
-              this.formData.ReturnType = returnTypeJsonData.RetnType;
-              this.formDataProperties.ReturnType.Enable = false;
-              this.formDataProperties.ModuleCode.Enable = false;
-              this.formDataProperties.btnModuleCode.Enable = false;
-              this.formDataProperties.ModuleCodeDesc.Enable = false;
-            }
-            if (this.pageType === 'newBasedOn') {
-              this.formData.ReturnType = '';
-            }
-            this.busy = false;
-          },
-          error: (err) => {
-            if (this.msgPrompt) this.msgPrompt.show(err, 'SOMNT24');
-            this.busy = false;
+          if (this.pageType === 'edit') {
+            this.formData.ReturnType = data.RetnType;
+            this.formDataProperties.ReturnType.Enable = false;
+            this.formDataProperties.ModuleCode.Enable = false;
           }
-        });
-    } else {
-      this.formData.ReturnValueValidation = 'No';
-    }
+          this.busy = false;
+        },
+        error: (err) => {
+          this.busy = false;
+          this.showError('Failed to load data');
+          console.error(err);
+        }
+      });
   }
 
-  lpmtModule_DataBind(): void {
-    if (this.lpmtModule) {
-      this.lpmtModule.dataSourceObservable = this.returnTypeService.GetModulePromptDataForNew();
-    }
+  openModulePrompt(): void {
+    this.snackBar.open('Module selection coming soon', 'Close', { duration: 3000 });
   }
 
-  lpmtReturnCategory_DataBind(): void {
-    if (this.lpmtReturnCategory) {
-      this.lpmtReturnCategory.dataSourceObservable = this.returnTypeService.GetCategoryPromptData();
-    }
-  }
-
-  ChangeReturnValueValidation(entry: string): void {
-    this.formData.ReturnValueValidation = entry;
-    this.clickRadtionButton();
-  }
-
-  clickRadtionButton(): void {
-    if (this.pageType === 'edit') {
-      this.busy = true;
-      this.returnTypeService.ExistTransaction(this.formData)
-        .subscribe({
-          next: (response: any) => {
-            if (response !== '') {
-              if (this.RVVcheck === '0') {
-                this.formData.ReturnValueValidation = 'No';
-              } else if (this.RVVcheck === '1' && response === '0') {
-                this.formData.ReturnValueValidation = 'Mandatory';
-              } else if (this.RVVcheck === '2' && response === '0') {
-                this.formData.ReturnValueValidation = 'WithConfirmation';
-              }
-            }
-            this.busy = false;
-          },
-          error: (err) => {
-            if (this.msgPrompt) this.msgPrompt.show(err, 'SOMNT24');
-            this.busy = false;
-          }
-        });
-    }
+  openCategoryPrompt(): void {
+    this.snackBar.open('Category selection coming soon', 'Close', { duration: 3000 });
   }
 
   btnOk_OnClick(formData: any): void {
     this.busy = true;
     this.returnTypeService.InsertReturnType(formData)
       .subscribe({
-        next: (jsonData: any) => {
-          if (jsonData === true) {
-            this.router.navigateByUrl('/list');
-          } else {
-            if (this.msgAlert) this.msgAlert.showAlert('Data Submitted Failed');
-          }
+        next: (response: any) => {
           this.busy = false;
+          if (response === true || response.success === true) {
+            this.snackBar.open('Record saved successfully!', 'Close', {
+              duration: 3000,
+              panelClass: ['success-snackbar']
+            });
+            setTimeout(() => this.router.navigateByUrl('/list'), 2000);
+          } else {
+            this.showError('Failed to save record');
+          }
         },
         error: (err) => {
-          if (this.msgPrompt) this.msgPrompt.show(err, 'SOMNT24');
           this.busy = false;
+          this.showError('Failed to save record');
+          console.error(err);
         }
       });
   }
 
   goBack(): void {
     this.router.navigateByUrl('/list');
+  }
+
+  private showError(message: string): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 5000,
+      panelClass: ['error-snackbar'],
+      horizontalPosition: 'center',
+      verticalPosition: 'top'
+    });
   }
 }

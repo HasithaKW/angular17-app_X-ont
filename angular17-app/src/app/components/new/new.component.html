@@ -1,170 +1,319 @@
-<div *ngIf="busy" class="loading-spinner">Loading...</div>
+<!-- Loading Overlay -->
+<div class="loading-overlay" *ngIf="busy">
+  <div class="loading-content">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>{{ pageType === 'edit' ? 'Updating record...' : 'Creating record...' }}</p>
+  </div>
+</div>
 
-<xont-ventura-message-prompt #msgPrompt></xont-ventura-message-prompt>
+<!-- Main Container -->
+<div class="modern-container">
+  
+  <!-- Header Section -->
+  <div class="header-section" [class.edit-mode]="pageType === 'edit'">
+    <div class="header-content">
+      <div class="header-icon-wrapper">
+        <mat-icon class="header-icon">{{ pageType === 'edit' ? 'edit' : 'add_circle_outline' }}</mat-icon>
+      </div>
+      <div>
+        <h1 class="page-title">
+          {{ pageType === 'edit' ? 'Edit Return Type' : 'Create New Return Type' }}
+        </h1>
+        <p class="subtitle">
+          {{ pageType === 'edit' ? 'Modify existing return type configuration' : 'Add a new return type to the system' }}
+        </p>
+      </div>
+    </div>
+  </div>
 
-<xont-ventura-message-prompt [id]="'msgAlert'" messageType="alert" (onOK)="msgAlert_OkClick()" (onCancel)="msgAlert_OnCancel()" #msgAlert></xont-ventura-message-prompt>
+  <!-- Form Card -->
+  <mat-card class="form-card">
+    <mat-card-content>
+      <form #form1="ngForm" class="modern-form">
+        
+        <!-- Section 1: Basic Information -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <mat-icon>info</mat-icon>
+            </div>
+            <div class="section-title">
+              <h3>Basic Information</h3>
+              <p>Enter the fundamental details for the return type</p>
+            </div>
+          </div>
+          
+          <div class="form-grid">
+            <!-- Return Type Field -->
+            <div class="form-field-wrapper">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Return Type Code</mat-label>
+                <input matInput 
+                       [(ngModel)]="formData.ReturnType" 
+                       name="txtReturnType" 
+                       #txtReturnType="ngModel"
+                       [disabled]="!formDataProperties.ReturnType.Enable"
+                       placeholder="e.g., 01, 02, RT01"
+                       maxlength="10"
+                       required
+                       pattern="^[a-zA-Z0-9_\-]+$">
+                <mat-icon matSuffix>code</mat-icon>
+                <mat-error *ngIf="txtReturnType.errors?.['required']">
+                  Return Type is <strong>required</strong>
+                </mat-error>
+                <mat-error *ngIf="txtReturnType.errors?.['pattern']">
+                  Only letters, numbers, underscore and hyphen allowed
+                </mat-error>
+                <mat-hint>Unique identifier for the return type</mat-hint>
+              </mat-form-field>
+            </div>
 
-<form #form1="ngForm">
-  <table>
-    <tbody>
-      <tr>
-        <td width="140">
-          <span class="Captionstyle">Return Type</span>
-        </td>
-        <td width="200">
-          <input type="text" [(ngModel)]="formData.ReturnType" name="txtReturnType" #txtReturnType="ngModel" [disabled]="!formDataProperties.ReturnType.Enable"
-                 id="txtReturnType" class="Textboxstyle" style="width:120px;" maxlength="2" required pattern="^[a-zA-Z0-9_\-]+$"> 
-          <span [hidden]="!txtReturnType.errors || !txtReturnType.errors['required']" class="MandatoryValidatorStyle">*</span>
-          &nbsp;
-          <span [hidden]="!txtReturnType.errors || !txtReturnType.errors['pattern']" class="Errormessagetextstyle">Invalid entry</span>
-        </td>
-        <td width="140"></td>
-      </tr>
-      <tr>
-        <td width="140">
-          <span class="Captionstyle">Description</span>
-        </td>
-        <td width="200">
-          <input type="text" [(ngModel)]="formData.Description" name="txtDescription" #txtDescription="ngModel" 
-                 id="txtDescription" class="Textboxstyle" style="width:350px;" maxlength="50" required pattern="^[^;‘‘’#&quot;'&amp;]*$">
-        </td>
-        <td width="140">
-          <span [hidden]="!txtDescription.errors || !txtDescription.errors['required']" class="MandatoryValidatorStyle">*</span>&nbsp;
-          <span [hidden]="!txtDescription.errors || !txtDescription.errors['pattern']" class="Errormessagetextstyle">Invalid entry</span>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <table>
-    <tbody>
-      <tr>
-        <td width="140">
-          <span class="Captionstyle">Module Code</span>
-        </td>
-        <td width="565">
-          <xont-ventura-list-prompt name="lpmtModule" id="lpmtModule"
-                                    #lpmtModule
-                                    [maxLengths]="[4,50]"
-                                    [inputWidths]="[120,380]"
-                                    [gridHeaders]="['Module Code','Description']"
-                                    [gridFields]="['Module Code','Description']"
-                                    [disabled]="!formDataProperties.btnModuleCode.Enable"
-                                    [strict]="true"
-                                    [mandatory]="true" 
-                                    (onDataBind)="lpmtModule_DataBind()"
-                                    [(ngModel)]="formData"
-                                    [modelProps]="['ModuleCode','ModuleCodeDesc']"
-                                    [dataFields]="['Module Code','Description']">
-          </xont-ventura-list-prompt>
-        </td>
-        <td width="140"></td>
-      </tr>
-      <tr>
-        <td width="140">
-          <span class="Captionstyle">Return Category</span>
-        </td>
-        <td width="565">
-          <xont-ventura-list-prompt name="lpmtReturnCategory" id="lpmtReturnCategory"
-                                    #lpmtReturnCategory
-                                    [maxLengths]="[4,50]"
-                                    [inputWidths]="[120,380]"
-                                    [gridHeaders]="['Module Code','Description']"
-                                    [gridFields]="['Return Catagory','Description']"
-                                    [strict]="true"
-                                    (onDataBind)="lpmtReturnCategory_DataBind()"
-                                    [(ngModel)]="formData"
-                                    [modelProps]="['ReturnCategory','CategoryDesc']"
-                                    [dataFields]="['Return Catagory','Description']">
-          </xont-ventura-list-prompt>
-        </td>
-        <td width="140"></td>
-      </tr>
-    </tbody>
-  </table>
-  <table>
-    <tbody>
-      <tr>
-        <td width="140"></td>
-        <td>
-          <fieldset style="width:300px">
-            <legend class="Captionstyle">Return Value Validation</legend>
-            <table>
-              <tbody>
-                <tr>
-                  <td>
-                    <span class="Captionstyle">
-                      <input id="optNo" type="radio" name="ReturnValueValidation"
-                              value="No" [checked]="formData.ReturnValueValidation ==='No'"
-                              (change)="ChangeReturnValueValidation('No')">
-                      <label for="optNo">No</label>&nbsp;&nbsp;
-                    </span>
-                  </td>
-                  <td>
-                    <span class="Captionstyle">
-                      <input id="optMandatory" type="radio" name="ReturnValueValidation"
-                             value="Mandatory" [checked]="formData.ReturnValueValidation ==='Mandatory'"
-                             (change)="ChangeReturnValueValidation('Mandatory')">
-                      <label for="optMandatory">Mandatory</label>&nbsp;&nbsp;
-                    </span>
-                  </td>
-                  <td>
-                    <span class="Captionstyle">
-                      <input id="optWithConfirmation" type="radio" name="ReturnValueValidation"
-                              value="WithConfirmation" [checked]="formData.ReturnValueValidation ==='WithConfirmation'"
-                              (change)="ChangeReturnValueValidation('WithConfirmation')">
-                      <label for="optWithConfirmation">With Confirmation</label>
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </fieldset>
-        </td>
-        <td></td>
-      </tr>
-    </tbody>
-  </table>
-  <table>
-    <tbody>
-      <tr>
-        <td width="140"></td>
-        <td width="140">
-          <input type="checkbox" name="chkSalable" [(ngModel)]="formData.SalableReturn" [checked]="formData.SalableReturn" />
-          &nbsp;
-          <span class="Captionstyle">Salable Return</span>
-        </td>
-        <td></td>
-      </tr>
-      <tr>
-        <td width="140"></td>
-        <td width="140">
-          <input type="checkbox" name="chkDeduct" [(ngModel)]="formData.DeductFromSales" [checked]="formData.DeductFromSales"  />
-          &nbsp;
-          <span class="Captionstyle">Deduct From Sales</span>
-        </td>
-        <td width="140"></td>
-      </tr>
-      <tr>
-        <td width="140"></td>
-        <td width="140">
-          <input type="checkbox" name="chkActive" [(ngModel)]="formData.Active" [checked]="formData.Active" />
-          &nbsp;
-          <span class="Captionstyle">Active</span>
-        </td>
-        <td width="140"></td>
-      </tr>
-    </tbody>
-  </table>
-  <table>
-    <tbody>
-      <tr>
-        <td width="250">
-          <button id="btnOK" [disabled]="!lpmtModule?.valid || !form1.valid" (click)="btnOk_OnClick(formData)" class="MainButtonStyle">OK</button>&nbsp;
-          <button id="btnCancel" (click)="goBack()" class="MainButtonStyle">Cancel</button>
-        </td>
-        <td></td>
-        <td></td>
-      </tr>
-    </tbody>
-  </table>
-</form>
+            <!-- Description Field -->
+            <div class="form-field-wrapper">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Description</mat-label>
+                <input matInput 
+                       [(ngModel)]="formData.Description" 
+                       name="txtDescription" 
+                       #txtDescription="ngModel"
+                       placeholder="Enter a clear description"
+                       maxlength="100"
+                       required>
+                <mat-icon matSuffix>description</mat-icon>
+                <mat-error *ngIf="txtDescription.errors?.['required']">
+                  Description is <strong>required</strong>
+                </mat-error>
+                <mat-hint>Maximum 100 characters</mat-hint>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Module Configuration -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <mat-icon>apps</mat-icon>
+            </div>
+            <div class="section-title">
+              <h3>Module Configuration</h3>
+              <p>Select the module associated with this return type</p>
+            </div>
+          </div>
+          
+          <div class="form-grid">
+            <!-- Module Code Field -->
+            <div class="form-field-wrapper">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Module Code</mat-label>
+                <input matInput 
+                       [(ngModel)]="formData.ModuleCode" 
+                       name="txtModuleCode" 
+                       [disabled]="!formDataProperties.ModuleCode.Enable"
+                       placeholder="Select or search module"
+                       required>
+                <button matSuffix mat-icon-button (click)="openModulePrompt()" matTooltip="Search Module" [disabled]="!formDataProperties.ModuleCode.Enable">
+                  <mat-icon>search</mat-icon>
+                </button>
+                <mat-error *ngIf="!formData.ModuleCode">
+                  Module Code is <strong>required</strong>
+                </mat-error>
+                <mat-hint>Click the search icon to browse modules</mat-hint>
+              </mat-form-field>
+            </div>
+
+            <!-- Module Description -->
+            <div class="form-field-wrapper">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Module Description</mat-label>
+                <input matInput 
+                       [(ngModel)]="formData.ModuleCodeDesc" 
+                       name="txtModuleCodeDesc"
+                       [disabled]="true"
+                       placeholder="Auto-populated">
+                <mat-icon matSuffix>auto_awesome</mat-icon>
+                <mat-hint>Automatically populated from module selection</mat-hint>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Category Information -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <mat-icon>category</mat-icon>
+            </div>
+            <div class="section-title">
+              <h3>Category Information</h3>
+              <p>Categorize the return type for better organization</p>
+            </div>
+          </div>
+          
+          <div class="form-grid">
+            <!-- Return Category Field -->
+            <div class="form-field-wrapper">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Return Category</mat-label>
+                <input matInput 
+                       [(ngModel)]="formData.ReturnCategory" 
+                       name="txtReturnCategory"
+                       placeholder="Select or search category">
+                <button matSuffix mat-icon-button (click)="openCategoryPrompt()" matTooltip="Search Category">
+                  <mat-icon>search</mat-icon>
+                </button>
+                <mat-hint>Select a category from the list</mat-hint>
+              </mat-form-field>
+            </div>
+
+            <!-- Category Description -->
+            <div class="form-field-wrapper">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Category Description</mat-label>
+                <input matInput 
+                       [(ngModel)]="formData.CategoryDesc" 
+                       name="txtCategoryDesc"
+                       [disabled]="true"
+                       placeholder="Auto-populated">
+                <mat-icon matSuffix>auto_awesome</mat-icon>
+                <mat-hint>Automatically populated from category selection</mat-hint>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4: Return Value Validation -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <mat-icon>verified</mat-icon>
+            </div>
+            <div class="section-title">
+              <h3>Return Value Validation</h3>
+              <p>Configure how return values should be validated</p>
+            </div>
+          </div>
+          
+          <div class="validation-options">
+            <div class="radio-group">
+              <!-- No Validation Option -->
+              <mat-radio-button value="No" [(ngModel)]="formData.ReturnValueValidation" name="validationGroup" class="radio-option">
+                <div class="radio-content">
+                  <div class="radio-icon">
+                    <mat-icon>do_not_disturb</mat-icon>
+                  </div>
+                  <div class="radio-text">
+                    <span class="radio-title">No Validation</span>
+                    <span class="radio-description">Return values are accepted without any validation</span>
+                  </div>
+                  <div class="radio-check"></div>
+                </div>
+              </mat-radio-button>
+              
+              <!-- Mandatory Validation Option -->
+              <mat-radio-button value="Mandatory" [(ngModel)]="formData.ReturnValueValidation" name="validationGroup" class="radio-option">
+                <div class="radio-content">
+                  <div class="radio-icon">
+                    <mat-icon>check_circle</mat-icon>
+                  </div>
+                  <div class="radio-text">
+                    <span class="radio-title">Mandatory</span>
+                    <span class="radio-description">Return value must be provided for each transaction</span>
+                  </div>
+                  <div class="radio-check"></div>
+                </div>
+              </mat-radio-button>
+              
+              <!-- With Confirmation Option -->
+              <mat-radio-button value="WithConfirmation" [(ngModel)]="formData.ReturnValueValidation" name="validationGroup" class="radio-option">
+                <div class="radio-content">
+                  <div class="radio-icon">
+                    <mat-icon>warning</mat-icon>
+                  </div>
+                  <div class="radio-text">
+                    <span class="radio-title">With Confirmation</span>
+                    <span class="radio-description">Requires user confirmation before processing</span>
+                  </div>
+                  <div class="radio-check"></div>
+                </div>
+              </mat-radio-button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 5: Configuration Flags -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <mat-icon>flag</mat-icon>
+            </div>
+            <div class="section-title">
+              <h3>Configuration Flags</h3>
+              <p>Enable or disable specific features for this return type</p>
+            </div>
+          </div>
+          
+          <div class="flags-container">
+            <div class="flags-grid">
+              <!-- Salable Return -->
+              <div class="flag-card">
+                <mat-checkbox [(ngModel)]="formData.SalableReturn" name="chkSalable" color="primary" class="flag-checkbox">
+                  <div class="flag-content">
+                    <mat-icon>shopping_cart</mat-icon>
+                    <div class="flag-text">
+                      <span class="flag-title">Salable Return</span>
+                      <span class="flag-description">Return can be processed as a saleable item</span>
+                    </div>
+                  </div>
+                </mat-checkbox>
+              </div>
+              
+              <!-- Deduct From Sales -->
+              <div class="flag-card">
+                <mat-checkbox [(ngModel)]="formData.DeductFromSales" name="chkDeduct" color="primary" class="flag-checkbox">
+                  <div class="flag-content">
+                    <mat-icon>trending_down</mat-icon>
+                    <div class="flag-text">
+                      <span class="flag-title">Deduct From Sales</span>
+                      <span class="flag-description">Deduct return value from total sales amount</span>
+                    </div>
+                  </div>
+                </mat-checkbox>
+              </div>
+              
+              <!-- Active Status -->
+              <div class="flag-card">
+                <mat-checkbox [(ngModel)]="formData.Active" name="chkActive" color="primary" class="flag-checkbox">
+                  <div class="flag-content">
+                    <mat-icon>check_circle_outline</mat-icon>
+                    <div class="flag-text">
+                      <span class="flag-title">Active</span>
+                      <span class="flag-description">This return type is available for use</span>
+                    </div>
+                  </div>
+                </mat-checkbox>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+          <button mat-raised-button color="primary" 
+                  (click)="btnOk_OnClick(formData)" 
+                  [disabled]="!form1.valid || busy"
+                  class="action-button primary">
+            <mat-icon>{{ pageType === 'edit' ? 'save' : 'add' }}</mat-icon>
+            {{ pageType === 'edit' ? 'Update Record' : 'Create Record' }}
+          </button>
+          <button mat-stroked-button 
+                  (click)="goBack()" 
+                  class="action-button secondary">
+            <mat-icon>cancel</mat-icon>
+            Cancel
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
