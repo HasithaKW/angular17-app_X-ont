@@ -95,7 +95,51 @@ export class NewComponent implements OnInit {
       }
     });
   }
-
+btnOk_OnClick(formData: any): void {
+  console.log('=== SAVING FORM DATA ===');
+  console.log('Form data before save:', formData);
+  
+  this.busy = true;
+  
+  // Prepare data for saving
+  const saveData = {
+    ReturnType: formData.ReturnType,
+    Description: formData.Description,
+    ModuleCode: formData.ModuleCode,
+    ModuleCodeDesc: formData.ModuleCodeDesc,
+    ReturnCategory: formData.ReturnCategory,
+    CategoryDesc: formData.CategoryDesc,
+    ReturnValueValidation: formData.ReturnValueValidation,
+    SalableReturn: formData.SalableReturn,
+    DeductFromSales: formData.DeductFromSales,
+    Active: formData.Active,
+    pageType: this.pageType
+  };
+  
+  // Use InsertReturnType (capital I)
+  this.returnTypeService.InsertReturnType(saveData)
+    .subscribe({
+      next: (response: any) => {
+        this.busy = false;
+        console.log('Save response:', response);
+        
+        if (response && response.success === true) {
+          this.snackBar.open('Record saved successfully!', 'Close', {
+            duration: 3000,
+            panelClass: ['success-snackbar']
+          });
+          setTimeout(() => this.router.navigateByUrl('/list'), 2000);
+        } else {
+          this.showError('Failed to save record');
+        }
+      },
+      error: (err: any) => {
+        this.busy = false;
+        console.error('Save error:', err);
+        this.showError('Failed to save record: ' + (err.message || 'Unknown error'));
+      }
+    });
+}
   loadExistingData(): void {
     if (!this.moduleCodeParam || !this.returnTypeCode) {
       console.error('Missing parameters:', { moduleCodeParam: this.moduleCodeParam, returnTypeCode: this.returnTypeCode });
@@ -106,7 +150,6 @@ export class NewComponent implements OnInit {
     this.busy = true;
     console.log(`Calling SeletedReturnType with: moduleCode=${this.moduleCodeParam}, returnType=${this.returnTypeCode}`);
     
-    // Use SeletedReturnType (the method that exists in your service)
     this.returnTypeService.SeletedReturnType(this.moduleCodeParam, this.returnTypeCode)
       .subscribe({
         next: (response: any) => {
@@ -192,53 +235,35 @@ export class NewComponent implements OnInit {
     this.snackBar.open('Category selection coming soon', 'Close', { duration: 3000 });
   }
 
-  // This method is called from the HTML
-  btnOk_OnClick(formData: any): void {
-    console.log('=== SAVING FORM DATA ===');
-    console.log('Form data before save:', formData);
-    
-    this.busy = true;
-    
-    // Prepare data for saving
-    const saveData = {
-      ReturnType: formData.ReturnType,
-      Description: formData.Description,
-      ModuleCode: formData.ModuleCode,
-      ModuleCodeDesc: formData.ModuleCodeDesc,
-      ReturnCategory: formData.ReturnCategory,
-      CategoryDesc: formData.CategoryDesc,
-      ReturnValueValidation: formData.ReturnValueValidation,
-      SalableReturn: formData.SalableReturn,
-      DeductFromSales: formData.DeductFromSales,
-      Active: formData.Active,
-      TimeStamp: formData.TimeStamp,
-      pageType: this.pageType
-    };
-    
-    // Use InsertReturnType (the method that exists in your service)
-    this.returnTypeService.InsertReturnType(saveData)
-      .subscribe({
-        next: (response: any) => {
-          this.busy = false;
-          console.log('Save response:', response);
-          
-          if (response === true || response === 'true' || response?.success === true) {
-            this.snackBar.open('Record saved successfully!', 'Close', {
-              duration: 3000,
-              panelClass: ['success-snackbar']
-            });
-            setTimeout(() => this.router.navigateByUrl('/list'), 2000);
-          } else {
-            this.showError('Failed to save record: ' + (response?.message || 'Unknown error'));
-          }
-        },
-        error: (err: any) => {
-          this.busy = false;
-          console.error('Save error:', err);
-          this.showError('Failed to save record: ' + (err.message || 'Unknown error'));
-        }
-      });
+btnNewBased_onClick(item: any): void {
+  console.log('NewBasedOn clicked for item:', item);
+  const returnType = item.ReturnType || item.retnType;
+  const moduleCode = item.ModuleCode || item.moduleCode;
+  if (returnType && moduleCode) {
+    this.router.navigateByUrl(`new/newBasedOn/${returnType}/${moduleCode}`);
+  } else {
+    this.showError('Unable to create new based on this record');
   }
+}
+
+btnEdit_onClick(item: any): void {
+  console.log('Edit clicked for item:', item);
+  const returnType = item.ReturnType || item.retnType;
+  const moduleCode = item.ModuleCode || item.moduleCode;
+  
+  console.log(`Navigating to: new/edit/${returnType}/${moduleCode}`);
+  
+  if (returnType && moduleCode) {
+    this.router.navigateByUrl(`new/edit/${returnType}/${moduleCode}`);
+  } else {
+    console.error('Missing data for navigation:', { returnType, moduleCode });
+    this.showError('Unable to edit this record - missing data');
+  }
+}
+
+newClick(): void {
+  this.router.navigateByUrl('new/new');
+}
 
   goBack(): void {
     this.router.navigateByUrl('/list');

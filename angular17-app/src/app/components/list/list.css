@@ -231,22 +231,4 @@ table {
     width: 100%;
   }
   
-  /* Make sure the dropdown is properly styled */
-mat-select {
-  width: 100%;
-}
-
-/* Adjust the filter row for better spacing */
-.filter-row {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-  align-items: flex-start;
-}
-
-.filter-field {
-  flex: 1;
-  min-width: 200px;
-}
 }

@@ -1,4 +1,4 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -39,7 +39,7 @@ import { ReturnTypeService, SelectionCriteria } from '../../services/returntype.
   templateUrl: './list.component.html',
   styleUrls: ['./list.component.css']
 })
-export class ListComponent implements AfterViewInit {
+export class ListComponent implements AfterViewInit, OnInit {
   displayedColumns: string[] = ['returnType', 'description', 'moduleCode', 'status', 'actions'];
   returnType: any[] = [];
   busy = false;
@@ -47,7 +47,7 @@ export class ListComponent implements AfterViewInit {
   pageSize = 10;
   currentPage = 0;
   
-  // Add module list for dropdown
+  // Add these missing properties
   moduleList: any[] = [];
   selectedModule: string = '';
 
