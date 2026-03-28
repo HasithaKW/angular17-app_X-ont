@@ -12,11 +12,13 @@
   <!-- Header Section -->
   <div class="header-section">
     <div class="header-content">
-      <h1 class="page-title">
-        <mat-icon class="title-icon">receipt</mat-icon>
-        Return Type Management
-      </h1>
-      <p class="subtitle">Manage and configure return types for your business operations</p>
+      <div class="header-icon-wrapper">
+        <mat-icon class="header-icon">receipt</mat-icon>
+      </div>
+      <div>
+        <h1 class="page-title">Return Type Management</h1>
+        <p class="subtitle">Manage and configure return types for your business operations</p>
+      </div>
     </div>
   </div>
 
@@ -35,12 +37,14 @@
     <mat-card-content>
       <div class="filter-form">
         <div class="filter-grid">
-          <!-- Row 1 -->
+          <!-- Row 1: Return Type and Description -->
           <div class="filter-row">
             <div class="filter-field">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Return Type</mat-label>
-                <input matInput [(ngModel)]="selectionCriteria.RetnType" placeholder="e.g., 01, 02" maxlength="2">
+                <input matInput [(ngModel)]="selectionCriteria.RetnType" 
+                       placeholder="e.g., 01, 02" 
+                       maxlength="2">
                 <mat-icon matSuffix>code</mat-icon>
                 <mat-hint>Enter 2-character return type code</mat-hint>
               </mat-form-field>
@@ -49,27 +53,35 @@
             <div class="filter-field">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Description</mat-label>
-                <input matInput [(ngModel)]="selectionCriteria.Description" placeholder="Enter description" maxlength="40">
+                <input matInput [(ngModel)]="selectionCriteria.Description" 
+                       placeholder="Enter description" 
+                       maxlength="40">
                 <mat-icon matSuffix>description</mat-icon>
+                <mat-hint>Enter return type description</mat-hint>
               </mat-form-field>
             </div>
           </div>
 
-          <!-- Row 2 -->
+          <!-- Row 2: Module Code Dropdown and Active Only Checkbox -->
           <div class="filter-row">
             <div class="filter-field">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Module Code</mat-label>
-                <input matInput [(ngModel)]="selectionCriteria.ModuleCode" placeholder="Select or search module code">
-                <button matSuffix mat-icon-button (click)="openModulePrompt()" matTooltip="Search Module">
-                  <mat-icon>search</mat-icon>
-                </button>
-                <mat-hint>Click search icon to browse modules</mat-hint>
+                <mat-select [(ngModel)]="selectedModule" (selectionChange)="onModuleChange($event.value)">
+                  <mat-option value="">-- Select Module --</mat-option>
+                  <mat-option *ngFor="let module of moduleList" [value]="module.ModuleCode || module['Module Code']">
+                    {{ module.ModuleCode || module['Module Code'] }} - {{ module.Description || module['Description'] }}
+                  </mat-option>
+                </mat-select>
+                <mat-icon matSuffix>apps</mat-icon>
+                <mat-hint>Select module from dropdown to filter</mat-hint>
               </mat-form-field>
             </div>
 
             <div class="filter-field filter-checkbox">
-              <mat-checkbox [(ngModel)]="selectionCriteria.Status" class="active-checkbox" color="primary">
+              <mat-checkbox [(ngModel)]="selectionCriteria.Status" 
+                            class="active-checkbox" 
+                            color="primary">
                 <span class="checkbox-label">Active Only</span>
               </mat-checkbox>
               <mat-hint class="checkbox-hint">Show only active return types</mat-hint>
@@ -78,7 +90,7 @@
         </div>
 
         <div class="filter-actions">
-          <button mat-raised-button color="primary" (click)="list(true)" [disabled]="busy" class="action-button">
+          <button mat-raised-button color="primary" (click)="loadData()" [disabled]="busy" class="action-button">
             <mat-icon>search</mat-icon>
             List Records
           </button>
@@ -124,9 +136,11 @@
               <th mat-header-cell *matHeaderCellDef> Return Type </th>
               <td mat-cell *matCellDef="let item"> 
                 <div class="cell-content">
-                  <span class="badge return-type-badge">{{ item.ReturnType || item.retnType }}</span>
+                  <span class="badge return-type-badge">
+                    {{ item.ReturnType || item.retnType || '-' }}
+                  </span>
                 </div>
-               </td>
+                </td>
             </ng-container>
 
             <!-- Description Column -->
@@ -134,9 +148,9 @@
               <th mat-header-cell *matHeaderCellDef> Description </th>
               <td mat-cell *matCellDef="let item"> 
                 <div class="cell-content description-text">
-                  {{ item.Description || item.description }}
+                  {{ item.Description || item.description || '-' }}
                 </div>
-               </td>
+                </td>
             </ng-container>
 
             <!-- Module Code Column -->
@@ -144,9 +158,11 @@
               <th mat-header-cell *matHeaderCellDef> Module Code </th>
               <td mat-cell *matCellDef="let item"> 
                 <div class="cell-content">
-                  <span class="badge module-badge">{{ item.ModuleCode || item.moduleCode }}</span>
+                  <span class="badge module-badge">
+                    {{ item.ModuleCode || item.moduleCode || '-' }}
+                  </span>
                 </div>
-               </td>
+                </td>
             </ng-container>
 
             <!-- Status Column -->
@@ -154,14 +170,16 @@
               <th mat-header-cell *matHeaderCellDef> Status </th>
               <td mat-cell *matCellDef="let item">
                 <div class="cell-content">
-                  <span class="status-badge" [class.active]="item.Status === '1'" [class.inactive]="item.Status !== '1'">
+                  <span class="status-badge" 
+                        [class.active]="item.Status === '1'" 
+                        [class.inactive]="item.Status !== '1'">
                     <mat-icon class="status-icon">
                       {{ item.Status === '1' ? 'check_circle' : 'cancel' }}
                     </mat-icon>
                     {{ item.Status === '1' ? 'Active' : 'Inactive' }}
                   </span>
                 </div>
-               </td>
+                </td>
             </ng-container>
 
             <!-- Actions Column -->
@@ -184,11 +202,11 @@
                     <mat-icon>edit</mat-icon>
                   </button>
                 </div>
-               </td>
+                </td>
             </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"> </tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="data-row"> </tr>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="data-row"></tr>
           </table>
         </div>
 
@@ -199,8 +217,7 @@
             [pageSize]="pageSize"
             [pageSizeOptions]="[5, 10, 20, 50, 100]"
             (page)="onPageChange($event)"
-            showFirstLastButtons
-            class="custom-paginator">
+            showFirstLastButtons>
           </mat-paginator>
         </div>
       </mat-card-content>

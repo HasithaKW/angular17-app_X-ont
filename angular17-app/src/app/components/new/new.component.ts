@@ -37,8 +37,8 @@ import { ReturnTypeService } from '../../services/returntype.service';
 })
 export class NewComponent implements OnInit {
   pageType: string = '';
-  private RetnType: string = '';
-  private ModuleCode: string = '';
+  public returnTypeCode: string = '';
+  public moduleCodeParam: string = '';
   busy = false;
 
   formData: any = {
@@ -51,7 +51,9 @@ export class NewComponent implements OnInit {
     ReturnValueValidation: 'No',
     SalableReturn: false,
     DeductFromSales: false,
-    Active: true
+    Active: true,
+    pageType: '',
+    TimeStamp: null
   };
 
   formDataProperties = {
@@ -68,53 +70,116 @@ export class NewComponent implements OnInit {
     private snackBar: MatSnackBar
   ) {
     this.returnTypeService.error$.subscribe((error: any) => {
+      console.error('Service error:', error);
       this.showError(error.message || 'An error occurred');
     });
   }
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
-      this.pageType = params['pageType'] || 'new';
-      this.RetnType = params['retnType'];
-      this.ModuleCode = params['moduleCode'];
+      console.log('=== ROUTE PARAMS ===');
+      console.log('All params:', params);
       
-      if (this.pageType === 'newBasedOn' || this.pageType === 'edit') {
+      this.pageType = params['pageType'] || 'new';
+      this.returnTypeCode = params['retnType'] || '';
+      this.moduleCodeParam = params['moduleCode'] || '';
+      this.formData.pageType = this.pageType;
+      
+      console.log('Page Type:', this.pageType);
+      console.log('Return Type Code:', this.returnTypeCode);
+      console.log('Module Code:', this.moduleCodeParam);
+      
+      if (this.pageType === 'edit' || this.pageType === 'newBasedOn') {
+        console.log('Loading data for edit/newBasedOn...');
         this.loadExistingData();
       }
     });
   }
 
   loadExistingData(): void {
+    if (!this.moduleCodeParam || !this.returnTypeCode) {
+      console.error('Missing parameters:', { moduleCodeParam: this.moduleCodeParam, returnTypeCode: this.returnTypeCode });
+      this.showError('Unable to load data - missing parameters');
+      return;
+    }
+    
     this.busy = true;
-    this.returnTypeService.SeletedReturnType(this.ModuleCode, this.RetnType)
+    console.log(`Calling SeletedReturnType with: moduleCode=${this.moduleCodeParam}, returnType=${this.returnTypeCode}`);
+    
+    // Use SeletedReturnType (the method that exists in your service)
+    this.returnTypeService.SeletedReturnType(this.moduleCodeParam, this.returnTypeCode)
       .subscribe({
-        next: (data: any) => {
-          this.formData.Description = data.Description;
-          this.formData.ReturnCategory = data.ReturnCategory;
-          this.formData.CategoryDesc = data.ReturnCategoryDesc;
-          this.formData.ModuleCode = data.ModuleCode;
-          this.formData.ModuleCodeDesc = data.ModuleCodeDesc;
-          this.formData.TimeStamp = data.TimeStamp;
-          this.formData.SalableReturn = data.ProcessingRequired === '1';
-          this.formData.Active = data.Status === '1';
-          this.formData.DeductFromSales = data.ReturnDeductionType !== '0';
-
-          const validation = data.ValidateReturnValue;
-          if (validation === '0') this.formData.ReturnValueValidation = 'No';
-          else if (validation === '1') this.formData.ReturnValueValidation = 'Mandatory';
-          else this.formData.ReturnValueValidation = 'WithConfirmation';
-
-          if (this.pageType === 'edit') {
-            this.formData.ReturnType = data.RetnType;
-            this.formDataProperties.ReturnType.Enable = false;
-            this.formDataProperties.ModuleCode.Enable = false;
+        next: (response: any) => {
+          console.log('=== API RESPONSE ===');
+          console.log('Full response:', response);
+          this.busy = false;
+          
+          if (response && response.data) {
+            const data = response.data;
+            console.log('Data object:', data);
+            
+            // Map the data to form fields
+            this.formData.ReturnType = data.retnType || data.ReturnType || this.returnTypeCode;
+            this.formData.Description = data.description || data.Description || '';
+            this.formData.ModuleCode = data.moduleCode || data.ModuleCode || this.moduleCodeParam;
+            this.formData.ModuleCodeDesc = data.moduleCodeDesc || data.ModuleCodeDesc || '';
+            this.formData.ReturnCategory = data.returnCategory || data.ReturnCategory || '';
+            this.formData.CategoryDesc = data.returnCategoryDesc || data.ReturnCategoryDesc || '';
+            this.formData.TimeStamp = data.timeStamp || data.TimeStamp || null;
+            
+            // Set checkboxes
+            this.formData.SalableReturn = (data.processingRequired === '1' || data.ProcessingRequired === '1');
+            this.formData.Active = (data.status === '1' || data.Status === '1');
+            this.formData.DeductFromSales = (data.returnDeductionType === '1' || data.ReturnDeductionType === '1');
+            
+            // Set validation type
+            const validation = data.validateReturnValue || data.ValidateReturnValue;
+            if (validation === '0') {
+              this.formData.ReturnValueValidation = 'No';
+            } else if (validation === '1') {
+              this.formData.ReturnValueValidation = 'Mandatory';
+            } else if (validation === '2') {
+              this.formData.ReturnValueValidation = 'WithConfirmation';
+            }
+            
+            // For edit mode, disable Return Type and Module Code fields
+            if (this.pageType === 'edit') {
+              this.formDataProperties.ReturnType.Enable = false;
+              this.formDataProperties.ModuleCode.Enable = false;
+              this.formDataProperties.btnModuleCode.Enable = false;
+              this.formDataProperties.ModuleCodeDesc.Enable = false;
+            }
+            
+            console.log('=== MAPPED FORM DATA ===');
+            console.log('ReturnType:', this.formData.ReturnType);
+            console.log('Description:', this.formData.Description);
+            console.log('ModuleCode:', this.formData.ModuleCode);
+            console.log('ModuleCodeDesc:', this.formData.ModuleCodeDesc);
+            console.log('ReturnCategory:', this.formData.ReturnCategory);
+            console.log('CategoryDesc:', this.formData.CategoryDesc);
+            console.log('ReturnValueValidation:', this.formData.ReturnValueValidation);
+            console.log('SalableReturn:', this.formData.SalableReturn);
+            console.log('DeductFromSales:', this.formData.DeductFromSales);
+            console.log('Active:', this.formData.Active);
+            
+            // Force change detection
+            this.formData = { ...this.formData };
+            
+            if (this.formData.Description) {
+              this.snackBar.open('Data loaded successfully', 'Close', { duration: 2000 });
+            } else {
+              console.warn('No description found in response');
+            }
+          } else {
+            console.error('Invalid response format:', response);
+            this.showError('No data found for this record');
           }
-          this.busy = false;
         },
-        error: (err) => {
+        error: (err: any) => {
           this.busy = false;
-          this.showError('Failed to load data');
-          console.error(err);
+          console.error('=== API ERROR ===');
+          console.error('Error details:', err);
+          this.showError('Failed to load data: ' + (err.message || 'Unknown error'));
         }
       });
   }
@@ -127,26 +192,50 @@ export class NewComponent implements OnInit {
     this.snackBar.open('Category selection coming soon', 'Close', { duration: 3000 });
   }
 
+  // This method is called from the HTML
   btnOk_OnClick(formData: any): void {
+    console.log('=== SAVING FORM DATA ===');
+    console.log('Form data before save:', formData);
+    
     this.busy = true;
-    this.returnTypeService.InsertReturnType(formData)
+    
+    // Prepare data for saving
+    const saveData = {
+      ReturnType: formData.ReturnType,
+      Description: formData.Description,
+      ModuleCode: formData.ModuleCode,
+      ModuleCodeDesc: formData.ModuleCodeDesc,
+      ReturnCategory: formData.ReturnCategory,
+      CategoryDesc: formData.CategoryDesc,
+      ReturnValueValidation: formData.ReturnValueValidation,
+      SalableReturn: formData.SalableReturn,
+      DeductFromSales: formData.DeductFromSales,
+      Active: formData.Active,
+      TimeStamp: formData.TimeStamp,
+      pageType: this.pageType
+    };
+    
+    // Use InsertReturnType (the method that exists in your service)
+    this.returnTypeService.InsertReturnType(saveData)
       .subscribe({
         next: (response: any) => {
           this.busy = false;
-          if (response === true || response.success === true) {
+          console.log('Save response:', response);
+          
+          if (response === true || response === 'true' || response?.success === true) {
             this.snackBar.open('Record saved successfully!', 'Close', {
               duration: 3000,
               panelClass: ['success-snackbar']
             });
             setTimeout(() => this.router.navigateByUrl('/list'), 2000);
           } else {
-            this.showError('Failed to save record');
+            this.showError('Failed to save record: ' + (response?.message || 'Unknown error'));
           }
         },
-        error: (err) => {
+        error: (err: any) => {
           this.busy = false;
-          this.showError('Failed to save record');
-          console.error(err);
+          console.error('Save error:', err);
+          this.showError('Failed to save record: ' + (err.message || 'Unknown error'));
         }
       });
   }

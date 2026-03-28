@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, Subject } from 'rxjs';
-import { catchError, retry } from 'rxjs/operators';
+import { catchError, timeout } from 'rxjs/operators';
 
 export interface SelectionCriteria {
   ModuleCode: string;
@@ -12,21 +12,6 @@ export interface SelectionCriteria {
   FirstRow: number;
   LastRow: number;
   Collapsed: boolean;
-}
-
-export interface ReturnTypeData {
-  ReturnType: string;
-  Description: string;
-  ModuleCode: string;
-  ModuleCodeDesc: string;
-  ReturnCategory: string;
-  CategoryDesc: string;
-  ReturnValueValidation: string;
-  SalableReturn: boolean;
-  DeductFromSales: boolean;
-  Active: boolean;
-  TimeStamp?: any;
-  pageType?: string;
 }
 
 @Injectable({
@@ -43,10 +28,8 @@ export class ReturnTypeService {
     let errorMessage = 'An unknown error occurred!';
     
     if (error.error instanceof ErrorEvent) {
-      // Client-side error
       errorMessage = `Error: ${error.error.message}`;
     } else {
-      // Server-side error
       switch (error.status) {
         case 0:
           errorMessage = 'Cannot connect to the server. Please check if the backend is running.';
@@ -58,13 +41,13 @@ export class ReturnTypeService {
           errorMessage = 'Unauthorized. Please log in again.';
           break;
         case 403:
-          errorMessage = 'Access denied. You don\'t have permission to perform this action.';
+          errorMessage = 'Access denied.';
           break;
         case 404:
           errorMessage = 'The requested resource was not found.';
           break;
         case 500:
-          errorMessage = 'Server error. Please try again later or contact support.';
+          errorMessage = 'Server error. Please try again later.';
           break;
         default:
           errorMessage = `Server returned code ${error.status}: ${error.message}`;
@@ -83,67 +66,92 @@ export class ReturnTypeService {
     });
   }
 
+  // GET - Module Prompt Data
   GetModulePromptData(): Observable<any> {
     return this.http.get(`${this.apiBase}/GetModulePromptData`, { headers: this.getHeaders() })
       .pipe(
-        retry(1),
+        timeout(30000),
         catchError(error => this.handleError(error))
       );
   }
 
+  // GET - Module Prompt Data for New
   GetModulePromptDataForNew(): Observable<any> {
     return this.http.get(`${this.apiBase}/GetModulePromptDataForNew`, { headers: this.getHeaders() })
       .pipe(
-        retry(1),
+        timeout(30000),
         catchError(error => this.handleError(error))
       );
   }
 
+  // GET - Category Prompt Data
   GetCategoryPromptData(): Observable<any> {
     return this.http.get(`${this.apiBase}/GetCategoryPromptData`, { headers: this.getHeaders() })
       .pipe(
-        retry(1),
+        timeout(30000),
         catchError(error => this.handleError(error))
       );
   }
 
+  // POST - List Return Type Data
   ListReturnTypeData(selectionCriteria: SelectionCriteria): Observable<any> {
     return this.http.post(`${this.apiBase}/ListReturnTypeData`, selectionCriteria, { headers: this.getHeaders() })
       .pipe(
-        retry(1),
+        timeout(30000),
         catchError(error => this.handleError(error))
       );
   }
 
+  // GET - Get Single Return Type
   SeletedReturnType(moduleCode: string, returnType: string): Observable<any> {
-    return this.http.get(`${this.apiBase}/SeletedReturnType?moduleCode=${encodeURIComponent(moduleCode)}&returnType=${encodeURIComponent(returnType)}`)
+    const url = `${this.apiBase}/SeletedReturnType?moduleCode=${encodeURIComponent(moduleCode)}&returnType=${encodeURIComponent(returnType)}`;
+    return this.http.get(url)
       .pipe(
-        retry(1),
+        timeout(30000),
         catchError(error => this.handleError(error))
       );
   }
 
+  // POST - Insert or Update Return Type
   InsertReturnType(formData: any): Observable<any> {
-    return this.http.post(`${this.apiBase}/InsertReturnType`, formData, { headers: this.getHeaders() })
+    const payload = {
+      ReturnType: formData.ReturnType || '',
+      Description: formData.Description || '',
+      ModuleCode: formData.ModuleCode || '',
+      ModuleCodeDesc: formData.ModuleCodeDesc || '',
+      ReturnCategory: formData.ReturnCategory || '',
+      CategoryDesc: formData.CategoryDesc || '',
+      ReturnValueValidation: formData.ReturnValueValidation || 'No',
+      SalableReturn: formData.SalableReturn || false,
+      DeductFromSales: formData.DeductFromSales || false,
+      Active: formData.Active || false,
+      pageType: formData.pageType || 'new'
+    };
+    
+    console.log('Sending payload to backend:', payload);
+    
+    return this.http.post(`${this.apiBase}/InsertReturnType`, payload, { headers: this.getHeaders() })
       .pipe(
-        retry(1),
+        timeout(30000),
         catchError(error => this.handleError(error))
       );
   }
 
+  // POST - Check if transaction exists
   ExistTransaction(formData: any): Observable<any> {
     const objectData = { formData };
     return this.http.post(`${this.apiBase}/ExistTransaction`, JSON.stringify(objectData), { headers: this.getHeaders() })
       .pipe(
-        retry(1),
+        timeout(30000),
         catchError(error => this.handleError(error))
       );
   }
 
+  // GET - Display Error Message
   GetDisplayErrorMessage(): Observable<any> {
     return this.http.get(`${this.apiBase}/GetDisplayErrorMessage`)
       .pipe(
-        retry(1),
+        timeout(30000),
         catchError(error => this.handleError(error))
       );
   }
